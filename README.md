@@ -1,3 +1,12 @@
+#### My changes
+
+How to run:
+
+```bash
+docker build -t logstash:6-arm-support .
+docker run --name logstash -p 9600:9600 -p 5043:5043/udp logstash:6-arm-support
+```
+
 # Logstash
 
 Logstash is part of the [Elastic Stack](https://www.elastic.co/products) along with Beats, Elasticsearch and Kibana. Logstash is a server-side data processing pipeline that ingests data from a multitude of sources simultaneously, transforms it, and then sends it to your favorite "stash." (Ours is Elasticsearch, naturally.). Logstash has over 200 plugins, and you can write your own very easily as well.
