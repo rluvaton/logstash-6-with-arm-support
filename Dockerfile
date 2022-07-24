@@ -81,11 +81,14 @@ RUN mv jruby-complete-9.2.7.0.jar ../
 WORKDIR /opt/logstash
 
 ARG ELASTIC_SEARCH_HOST=http://elasticsearch:9200
+ENV ELASTIC_SEARCH_HOST=$ELASTIC_SEARCH_HOST
 
 RUN echo 'http.host: "0.0.0.0"' >> ./config/logstash.yml
-RUN echo 'xpack.management.elasticsearch.hosts: ["$ELASTIC_SEARCH_HOST"]' >> ./config/logstash.yml
+RUN echo "xpack.management.elasticsearch.hosts: [\"$ELASTIC_SEARCH_HOST\"]" >> ./config/logstash.yml
 
-CMD bin/logstash -e 'input { udp { port => 5043 } } output { elasticsearch { hosts => "$ELASTIC_SEARCH_HOST" } }'
+RUN cat ./config/logstash.yml
+
+CMD bin/logstash -e "input { udp { port => 5043 } } output { elasticsearch { hosts => \"$ELASTIC_SEARCH_HOST\" } }"
 
 LABEL retention="prune"
 
