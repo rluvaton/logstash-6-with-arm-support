@@ -56,5 +56,34 @@ RUN rm -rf build && \
 USER logstash
 WORKDIR /opt/logstash
 
+RUN rake bootstrap
+
+
+# Fix JRuby issue with ARM
+# From https://github.com/elastic/logstash/issues/10888#issuecomment-523760993
+WORKDIR /opt/logstash/logstash-core/lib/jars/
+
+RUN cp jruby-complete-9.2.7.0.jar jruby-complete-9.2.7.0.jar.bk
+
+RUN unzip jruby-complete-9.2.7.0.jar -d jruby-complete
+
+WORKDIR /opt/logstash/logstash-core/lib/jars/jruby-complete/META-INF/jruby.home/lib/ruby/stdlib/ffi/platform/aarch64-linux/
+
+RUN cp types.conf platform.conf
+
+WORKDIR /opt/logstash/logstash-core/lib/jars/jruby-complete/
+
+RUN zip -r jruby-complete-9.2.7.0.jar .
+
+# Override the previous one
+RUN mv jruby-complete-9.2.7.0.jar ../
+
+WORKDIR /opt/logstash
+
+RUN echo 'http.host: "0.0.0.0"' >> ./config/logstash.yml
+RUN echo 'xpack.management.elasticsearch.hosts: ["http://host.docker.internal:9200"]' >> ./config/logstash.yml
+
+CMD bin/logstash -e 'input { udp { port => 5043 } } output { elasticsearch { hosts => "http://host.docker.internal:9200" } }'
+
 LABEL retention="prune"
 
